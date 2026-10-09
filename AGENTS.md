@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Garden preservation
+- Serve the supplied standalone garden document in a full-screen iframe at the home route; isolation preserves its drawing engine, controls, styles, keyboard handling and exports without changing unrelated app systems.
