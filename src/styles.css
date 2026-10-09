@@ -63,8 +63,8 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --background: oklch(0 0 0);
+  --foreground: oklch(0.946 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
@@ -141,4 +141,19 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+}
+
+.garden-shell {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.garden-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--background);
 }
