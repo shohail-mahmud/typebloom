@@ -1,11 +1,47 @@
 {
   "source": "code-archive",
   "capabilities": [
-    {"capability":"Garden drawing and input","source":"Standalone index.html","outcome":"Preserve original engine in an isolated full-screen document","status":"pending","next_action":"Verify typing, cutting, withering and clearing"},
-    {"capability":"Poster, palettes and motion","source":"Standalone index.html","outcome":"Preserve all original controls","status":"pending","next_action":"Verify all palettes and seven motion modes"},
-    {"capability":"PNG, SVG, video and frame exports","source":"Browser canvas and MediaRecorder","outcome":"Preserve original export implementations","status":"pending","next_action":"Verify downloads"},
-    {"capability":"Database, records, auth, authorization and uploaded storage","source":"No such capability detected in standalone app","outcome":"Not applicable; no new services","status":"not_applicable","next_action":null},
-    {"capability":"External providers, endpoints, callbacks, schedules and secrets","source":"Google Fonts; browser-only script","outcome":"Preserve fonts, no server integrations","status":"pending","next_action":"Verify font loading and client runtime"},
-    {"capability":"Cutover","source":"Uploaded local document","outcome":"Preview only; no deployment requested","status":"not_applicable","next_action":null}
+    {
+      "capability": "Garden drawing and input",
+      "source": "Standalone index.html",
+      "outcome": "Preserve original engine in an isolated full-screen document",
+      "status": "verified",
+      "next_action": null
+    },
+    {
+      "capability": "Poster, palettes and motion",
+      "source": "Standalone index.html",
+      "outcome": "Preserve all original controls",
+      "status": "verified",
+      "next_action": null
+    },
+    {
+      "capability": "PNG, SVG, video and frame exports",
+      "source": "Browser canvas and MediaRecorder",
+      "outcome": "Preserve original export implementations",
+      "status": "verified",
+      "next_action": null
+    },
+    {
+      "capability": "Database, records, auth, authorization and uploaded storage",
+      "source": "No such capability detected in standalone app",
+      "outcome": "Not applicable; no new services",
+      "status": "not_applicable",
+      "next_action": null
+    },
+    {
+      "capability": "External providers, endpoints, callbacks, schedules and secrets",
+      "source": "Google Fonts; browser-only script",
+      "outcome": "Preserve fonts, no server integrations",
+      "status": "verified",
+      "next_action": null
+    },
+    {
+      "capability": "Cutover",
+      "source": "Uploaded local document",
+      "outcome": "Preview only; no deployment requested",
+      "status": "not_applicable",
+      "next_action": null
+    }
   ]
 }
