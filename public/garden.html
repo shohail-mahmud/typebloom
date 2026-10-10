@@ -108,6 +108,9 @@ html[data-touch] [data-tg="app"]{touch-action:none;top:var(--tg-top,0px)!importa
       <div class="sx-sec">
         <div class="sx-lbl"><span>01 — Words</span><b>A</b></div>
         <input id="pText" class="sx-input" spellcheck="false">
+        <div class="sx-lbl"><span>Size</span><b id="pSizeV">100%</b></div>
+        <input id="pSize" type="range" min="50" max="180" step="5" value="100" style="width:100%;accent-color:var(--pacc)">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer"><input id="pOne" type="checkbox" style="accent-color:var(--pacc);width:16px;height:16px"> Fit text in one line</label>
         <button id="reshuffle" class="sx-link">↻ Regrow garden</button>
       </div>
       <div class="sx-sec">
@@ -196,7 +199,7 @@ class TypeGarden {
       { id:'visit', label:'Visitor', sub:'Butterfly drops by · 7s', T:7000 }
     ];
     this.props = { boil:true, recoil:20, density:1, showHint:true };
-    this.state = { font:0, mode:'type', preset:'breathe', palette:0, text:'in bloom', seed:7, status:'', busy:false };
+    this.state = { font:0, mode:'type', preset:'breathe', palette:0, text:'in bloom', seed:7, size:100, oneLine:false, status:'', busy:false };
 
     this.letters = [];
     this.uid = 1;
@@ -273,6 +276,8 @@ class TypeGarden {
       this.fontsEl.appendChild(b);
     });
     this.pText.addEventListener('input', e => { this.state.text = e.target.value; this.buildPoster(); });
+    document.getElementById('pSize').addEventListener('input', e => { this.state.size = +e.target.value; document.getElementById('pSizeV').textContent = e.target.value + '%'; this.buildPoster(); });
+    document.getElementById('pOne').addEventListener('change', e => { this.state.oneLine = e.target.checked; this.buildPoster(); });
     document.getElementById('reshuffle').addEventListener('click', () => { this.state.seed = Math.floor(Math.random()*1e6); this.buildPoster(); });
     document.getElementById('exportVideo').addEventListener('click', () => this.exportVideo());
     document.getElementById('exportFrames').addEventListener('click', () => this.exportFrames());
@@ -416,7 +421,7 @@ class TypeGarden {
   // ---------- layout ----------
   resize(){ const c=this.cv, r=c.getBoundingClientRect(), d=window.devicePixelRatio||1; if(!r.width)return; this.W=r.width; this.H=r.height; this.dpr=d; c.width=Math.round(r.width*d); c.height=Math.round(r.height*d); this.layout(true); }
   mw(ch){ if(this.cache[ch]!=null)return this.cache[ch]; this.g.font=`${this.FW} 100px ${this.F}`; let w=this.g.measureText(ch).width/100; if(ch===' ')w*=1.4; return (this.cache[ch]=w); }
-  layoutCore(A,W,H,prevWrapped){
+  layoutCore(A,W,H,prevWrapped,noWrap){
     const maxW=W*0.8, S0=H*0.28, LH=2.1;
     const ws=A.map(l=>this.mw(l.ch));
     const words=[]; let cur=null;
@@ -428,7 +433,7 @@ class TypeGarden {
     const unit=lineW(lines[0],1);
     let S=unit>0?Math.min(S0,maxW/unit):S0;
     const multi=words.filter(w=>!w.sp).length>1;
-    let wrapped=multi && (S<H*0.1 || (prevWrapped && S<H*0.14));
+    let wrapped=!noWrap && multi && (S<H*0.1 || (prevWrapped && S<H*0.14));
     if(wrapped){
       let lo=H*0.03, hi=H*0.15;
       for(let k=0;k<22;k++){ const mid=(lo+hi)/2, ls=wrap(mid); const ok=ls.every(li=>lineW(li,mid)<=maxW) && ls.length*LH*mid<=H*0.82; if(ok)lo=mid; else hi=mid; }
@@ -540,7 +545,7 @@ class TypeGarden {
       const over=tp[1]>-0.78 && tp[1]<0.05 && Math.abs(tp[0])<p.w*0.5;
       const layer=over?(r()<0.2?1:0):(r()<0.55?1:tl);
       const kt = r();
-      const kind = ['daisy','star','cup','orchid','burst','peony','sunflower','cosmos','lotus','dahlia','zinnia'][Math.floor(kt*11)];
+      const kind = ['daisy','star','cup','orchid','burst','peony','sunflower','cosmos','lotus','dahlia','zinnia','marigold','anemone','carnation','chamomile','poppy'][Math.floor(kt*16)];
       E.push({t:'bloom',id:nid(),x:tp[0],y:tp[1],R,rot:(r()-0.5)*1.2,kind,petals:6+Math.floor(r()*8),squash:0.72+r()*0.55,layer,d0:td,ph1:r()*6.28,ph2:r()*6.28,ring:r()<0.58,halo:r()<0.33});
       if(r()<0.34){ const oo=ta+(r()<0.5?1:-1)*(1.0+r()*0.3); E.push({t:'bloom',id:nid(),x:tp[0]+Math.cos(oo)*R*(1.35+r()*0.25),y:tp[1]+Math.sin(oo)*R*(1.35+r()*0.25),R:R*(0.52+r()*0.28),rot:(r()-0.5)*1.2,kind:r()<0.5?kind:'daisy',petals:5+Math.floor(r()*6),squash:0.72+r()*0.45,layer,d0:td+70+r()*80,ph1:r()*6.28,ph2:r()*6.28,ring:r()<0.4,halo:r()<0.2}); }
       if(r()<0.22*p.flair){
@@ -704,7 +709,12 @@ class TypeGarden {
       cosmos: { rx:0.4, ry:0.74, off:0.4, center:0.16, rays:0.5, lift:0, maxP:8, notch:true },
       lotus: { rx:0.26, ry:0.95, off:0.36, center:0.18, rays:0.3, lift:-0.3, maxP:9 },
       dahlia: { rx:0.18, ry:0.6, off:0.36, center:0.14, rays:0.2, lift:0, minP:18 },
-      zinnia: { rx:0.36, ry:0.5, off:0.38, center:0.22, rays:0.6, lift:0, minP:12 }
+      zinnia: { rx:0.36, ry:0.5, off:0.38, center:0.22, rays:0.6, lift:0, minP:12 },
+      marigold: { rx:0.3, ry:0.45, off:0.3, center:0.18, rays:0.3, lift:0, minP:16, notch:true },
+      anemone: { rx:0.5, ry:0.6, off:0.36, center:0.3, rays:1, lift:0, maxP:6 },
+      carnation: { rx:0.34, ry:0.55, off:0.32, center:0.12, rays:0.2, lift:-0.1, minP:14, notch:true },
+      chamomile: { rx:0.12, ry:0.85, off:0.52, center:0.34, rays:0.8, lift:0, minP:18 },
+      poppy: { rx:0.56, ry:0.62, off:0.3, center:0.26, rays:1, lift:-0.1, maxP:5 }
     }[petalKind] || { rx:0.34, ry:0.66, off:0.34, center:0.24, rays:0.2, lift:0 };
     if (shape.minP) petals = Math.max(petals, shape.minP);
     if (shape.maxP) petals = Math.min(petals, shape.maxP);
@@ -1051,7 +1061,7 @@ class TypeGarden {
       if(pr.id!=='scatter' && l.ch!==' ' && nx && nx.ch===' '){ l.cutRel=Math.max(30,nx.b-l.b); this.genEnd(l,l.cutRel); }
     });
     this.rand=Math.random;
-    const res=this.layoutCore(L,1080,1080,false);
+    const res=this.layoutCore(L,1080,1080,false,s.oneLine);
     let S=res.S;
     let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
     const addP=(l,x,y,r)=>{ const X=l.tx+x*S, Y=l.ty+y*S, R=(r||0)*S; x0=Math.min(x0,X-R); x1=Math.max(x1,X+R); y0=Math.min(y0,Y-R); y1=Math.max(y1,Y+R); };
@@ -1068,7 +1078,9 @@ class TypeGarden {
     let tx0=1e9,tx1=-1e9,ty0=1e9,ty1=-1e9;
     for(const l of L) if(l.ch!==' '){ tx0=Math.min(tx0,l.tx-l.tw/2); tx1=Math.max(tx1,l.tx+l.tw/2); ty0=Math.min(ty0,l.ty-0.72*S); ty1=Math.max(ty1,l.ty); }
     const Z=1080, half=Z*0.44, bcx=(tx0+tx1)/2, bcy=(ty0+ty1)/2;
-    const k=Math.min(1.25,half/Math.max(1,bcx-x0,x1-bcx),half/Math.max(1,bcy-y0,y1-bcy));
+    let k=Math.min(1.25,half/Math.max(1,bcx-x0,x1-bcx),half/Math.max(1,bcy-y0,y1-bcy));
+    if(s.oneLine) k=Math.min(k*1.6, (Z*0.9)/Math.max(1,tx1-tx0));
+    k*=(s.size||100)/100;
     L.forEach(l=>{ l.tx=Z/2+(l.tx-bcx)*k; l.ty=Z/2+(l.ty-bcy)*k; l.tw*=k; l.x=l.tx; l.y=l.ty; });
     this.P={letters:L,S:S*k,T:pr.T,preset:pr.id};
     this.pt0=performance.now();
