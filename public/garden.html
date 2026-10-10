@@ -76,6 +76,31 @@ html[data-touch] [data-tg="app"]{touch-action:none;top:var(--tg-top,0px)!importa
 .sx-btn:disabled{opacity:.4;cursor:default}
 .sx-status{font-size:11px;color:var(--pacc);min-height:14px}
 @media (max-width:720px){[data-tg="panel"]{border-top:1px solid var(--pline)!important}.sx-title{font-size:36px}}
+/* Minimal palette controls and quiet typing */
+[data-tg="app"]{--ui-bg:#000;--ui-fg:#fff;--ui-line:color-mix(in srgb,var(--ui-fg) 18%,transparent);--ui-soft:color-mix(in srgb,var(--ui-fg) 7%,var(--ui-bg));--ui-shadow:0 12px 36px color-mix(in srgb,var(--ui-bg) 65%,transparent)}
+[data-tg="bar"]{opacity:1;justify-content:flex-end;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:0}
+[data-tg="ctrls"]{flex-wrap:wrap;justify-content:flex-end!important}
+[data-tg="modes"]{background:var(--ui-soft);border-color:var(--ui-line);right:calc(68px + env(safe-area-inset-right));font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
+[data-tg="btn"]{background:var(--ui-soft)!important;color:var(--ui-fg)!important;border-color:var(--ui-line)!important}
+.palette-menu{position:relative;color:var(--ui-fg)}
+.palette-menu summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;height:36px;padding:0 12px;border:1px solid var(--ui-line);border-radius:999px;background:var(--ui-soft);font-size:12px}
+.palette-menu summary::-webkit-details-marker{display:none}
+.palette-mini{display:flex;width:36px;height:18px;border-radius:6px;overflow:hidden;border:1px solid var(--ui-line)}
+.palette-mini span{flex:1;background:var(--swatch)}
+.palette-menu [data-tg="pal"]{position:absolute;bottom:48px;right:0;width:256px;max-width:calc(100vw - 48px);display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;border:1px solid var(--ui-line);border-radius:16px;background:var(--ui-bg);box-shadow:var(--ui-shadow);z-index:10}
+.palette-option{display:flex;flex-direction:column;gap:7px;padding:8px;min-width:0;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--ui-fg);font:inherit;text-align:left;cursor:pointer}
+.palette-option:hover{background:var(--ui-soft)}
+.palette-option[aria-pressed="true"]{border-color:var(--ui-fg);background:var(--ui-soft)}
+.palette-strip{display:flex;width:100%;height:24px;border-radius:6px;overflow:hidden;border:1px solid var(--ui-line)}
+.palette-strip span{flex:1;background:var(--swatch)}
+#ppal .palette-strip{height:36px}
+#ppal .sx-cell{gap:8px}
+.quiet-toggle{position:absolute;right:calc(16px + env(safe-area-inset-right));top:calc(16px + env(safe-area-inset-top));z-index:20;width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--ui-line);border-radius:50%;background:var(--ui-soft);color:var(--ui-fg);cursor:pointer;transition:opacity .2s}
+.quiet-toggle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+[data-tg="app"].quiet #bar,[data-tg="app"].quiet #modes{display:none!important}
+[data-tg="app"].quiet .quiet-toggle{opacity:.18;background:transparent;border-color:transparent}
+[data-tg="app"].quiet .quiet-toggle:hover,[data-tg="app"].quiet .quiet-toggle:focus-visible{opacity:1;background:var(--ui-soft);border-color:var(--ui-line)}
+@media(prefers-reduced-motion:reduce){.quiet-toggle{transition:none}}
 </style>
 </head>
 <body>
@@ -84,16 +109,11 @@ html[data-touch] [data-tg="app"]{touch-action:none;top:var(--tg-top,0px)!importa
   <input id="inp" data-tg="input" aria-label="Type to grow a garden" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" style="position:fixed;left:0;top:0;width:1px;height:1px;margin:0;padding:0;border:0;opacity:0;font-size:16px;color:transparent;background:transparent;caret-color:transparent;pointer-events:none">
 
   <div data-tg="modes" id="modes"></div>
+  <button id="quietBtn" class="quiet-toggle" aria-label="Hide controls" title="Hide controls" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.8 5.2A10 10 0 0112 5c5 0 9 7 9 7a17 17 0 01-3.1 3.7M6.2 6.2A19 19 0 003 12s4 7 9 7a10 10 0 005-1.4"/></svg></button>
 
   <div data-tg="bar" id="bar">
-    <div data-tg="hints" id="hints" style="display:flex;gap:20px;flex-wrap:wrap">
-      <span data-tg="fine">type to grow</span><span data-tg="coarse">tap to type</span>
-      <span>space cuts</span>
-      <span data-tg="fine">backspace withers</span><span data-tg="coarse">⌫ withers</span>
-      <span data-tg="fine">enter clears</span><span data-tg="coarse">return clears</span>
-    </div>
     <div data-tg="ctrls" style="display:flex;gap:8px;align-items:center">
-      <div data-tg="pal" id="tpal" style="display:flex;gap:6px;align-items:center;padding:4px 6px;border:1px solid #3A3A3A;border-radius:999px;background:#000"></div>
+      <details class="palette-menu" id="paletteMenu"><summary aria-label="Choose colours"><span class="palette-mini" id="palettePreview"></span><span id="paletteName">Rose noir</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div data-tg="pal" id="tpal"></div></details>
       <label title="Flowers" style="display:flex;align-items:center;gap:6px;font-size:12px">✿<input id="tFl" type="range" min="0" max="150" step="5" value="100" style="width:80px;accent-color:currentColor"></label>
       <button data-tg="btn" id="pngBtn" style="background:transparent;border:1px solid #3A3A3A;color:#BDBDBD;font:inherit;padding:8px 14px;border-radius:999px;cursor:pointer">PNG</button>
       <button data-tg="btn" id="svgBtn" style="background:transparent;border:1px solid #3A3A3A;color:#BDBDBD;font:inherit;padding:8px 14px;border-radius:999px;cursor:pointer">SVG</button>
@@ -202,7 +222,7 @@ class TypeGarden {
       { id:'visit', label:'Visitor', sub:'Butterfly drops by · 7s', T:7000 }
     ];
     this.props = { boil:true, recoil:20, density:1, flowers:1, showHint:true };
-    this.state = { font:0, mode:'type', preset:'breathe', palette:0, text:'in bloom', seed:7, size:100, oneLine:false, status:'', busy:false };
+    this.state = { font:0, quiet:false, mode:'type', preset:'breathe', palette:0, text:'in bloom', seed:7, size:100, oneLine:false, status:'', busy:false };
 
     this.letters = [];
     this.uid = 1;
@@ -248,17 +268,20 @@ class TypeGarden {
     document.getElementById('pngBtn').addEventListener('click', () => { this.savePNG(); this.refocus(); });
     document.getElementById('svgBtn').addEventListener('click', () => { this.saveSVG(); this.refocus(); });
 
+    this.quietBtn = document.getElementById('quietBtn');
+    this.quietBtn.addEventListener('click', () => this.setQuiet(!this.state.quiet));
+    this.paletteMenu = document.getElementById('paletteMenu');
+    const strips = p => p.slice(1,4).map(c => '<span style="--swatch:'+c+'"></span>').join('');
     this.PAL.forEach((p,i) => {
       const sw = document.createElement('button');
-      sw.dataset.tg='sw'; sw.setAttribute('aria-label',p[0]); sw.title=p[0];
-      sw.style.cssText='width:22px;height:22px;padding:0;border-radius:999px;cursor:pointer;background:'+p[1]+';border:1.5px solid transparent;display:flex;align-items:center;justify-content:center;transition:transform .15s';
-      sw.innerHTML='<span data-tg="dot" style="width:10px;height:10px;border-radius:999px;background:'+p[2]+'"></span>';
-      sw.addEventListener('click', e => { e.stopPropagation(); this.setPalette(i); });
+      sw.className='palette-option'; sw.setAttribute('aria-label',p[0]); sw.title=p[0];
+      sw.innerHTML='<span class="palette-strip">'+strips(p)+'</span><span>'+p[0]+'</span>';
+      sw.addEventListener('click', e => { e.stopPropagation(); this.paletteMenu.open=false; this.setPalette(i); });
       this.tpal.appendChild(sw);
 
       const card = document.createElement('button');
       card.className='sx-cell';
-      card.innerHTML = '<span class="sx-sw" style="background:'+p[1]+'"><i style="color:'+p[5]+'">Aa</i><span style="background:'+p[2]+'"></span><span style="background:'+p[3]+'"></span><span style="background:'+p[4]+'"></span></span><span class="t">'+p[0]+'</span>';
+      card.innerHTML = '<span class="palette-strip">'+strips(p)+'</span><span class="t">'+p[0]+'</span>';
       card.addEventListener('click', () => this.setPalette(i));
       this.ppal.appendChild(card);
     });
@@ -289,6 +312,12 @@ class TypeGarden {
     this.updateUI();
   }
 
+  setQuiet(hidden) {
+    this.state.quiet = hidden;
+    if (hidden) { this.paletteMenu.open = false; this.setMode('type'); }
+    this.updateUI();
+    this.refocus();
+  }
   setMode(m) {
     if (m === this.state.mode) return;
     this.state.mode = m;
@@ -309,20 +338,27 @@ class TypeGarden {
     const s = this.state, pc = this.pal();
     this.app.style.background = pc.bg;
     this.bar.style.color = pc.C.text;
-    this.tpal.style.background = pc.bg;
+    this.app.style.setProperty('--ui-bg',pc.bg);
+    this.app.style.setProperty('--ui-fg',pc.C.text);
+    this.app.classList.toggle('quiet',s.quiet);
+    this.quietBtn.setAttribute('aria-label',s.quiet ? 'Show controls' : 'Hide controls');
+    this.quietBtn.title = s.quiet ? 'Show controls' : 'Hide controls';
+    this.quietBtn.setAttribute('aria-pressed',String(s.quiet));
+    this.quietBtn.innerHTML = s.quiet ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s4-7 9-7 9 7 9 7-4 7-9 7-9-7-9-7z"/><circle cx="12" cy="12" r="2.5"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.8 5.2A10 10 0 0112 5c5 0 9 7 9 7a17 17 0 01-3.1 3.7M6.2 6.2A19 19 0 003 12s4 7 9 7a10 10 0 005-1.4"/></svg>';
+    document.getElementById('paletteName').textContent = this.PAL[s.palette][0];
+    document.getElementById('palettePreview').innerHTML = this.PAL[s.palette].slice(1,4).map(c => '<span style="--swatch:'+c+'"></span>').join('');
     this.bar.style.display = s.mode === 'type' && (this.props.showHint??true) ? 'flex' : 'none';
     { const P=this.PAL[s.palette]; const ps=this.poster.style; ps.setProperty('--pbg',P[1]); ps.setProperty('--pfg',P[5]); ps.setProperty('--pacc',P[2]); }
     this.poster.classList.toggle('open', s.mode === 'poster');
     this.cv.style.display = s.mode === 'type' ? 'block' : 'none';
 
-    const setBtn = (b, active, fgInactive) => { b.style.background = active ? '#FFFFFF' : 'transparent'; b.style.color = active ? '#000000' : (fgInactive||'#BDBDBD'); };
+    const setBtn = (b, active, fgInactive) => { b.style.background = active ? pc.C.text : 'transparent'; b.style.color = active ? pc.bg : (fgInactive||pc.C.text); };
     setBtn(this.typeModeBtn, s.mode === 'type');
     setBtn(this.posterModeBtn, s.mode === 'poster');
 
     this.tpal.childNodes.forEach((sw,i) => {
       const active = i === s.palette;
-      sw.style.borderColor = active ? pc.C.text : (this.PAL[i][1] === pc.bg ? '#3A3A3A' : 'transparent');
-      sw.style.transform = active ? 'scale(1.1)' : 'scale(1)';
+      sw.setAttribute('aria-pressed',String(active));
     });
     this.ppal.childNodes.forEach((card,i) => {
       card.classList.toggle('on', i === s.palette);
@@ -486,6 +522,7 @@ class TypeGarden {
     if(this.composing) this.iv=cur; else { el.value=S; this.iv=S; }
   }
   key(e){
+    if(e.key==='Escape' && this.state.quiet){ e.preventDefault(); this.setQuiet(false); return; }
     if(this.state.mode!=='type')return;
     if(e.metaKey || e.ctrlKey || e.altKey){
       if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); e.shiftKey?this.saveSVG():this.savePNG(); }
