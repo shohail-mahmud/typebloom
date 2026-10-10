@@ -511,7 +511,7 @@ class TypeGarden {
 
   // ---------- growth ----------
   pal(){ const p=this.PAL[this.state.palette]||this.PAL[0]; return {bg:p[1], C:{red:p[2],blue:p[3],line:p[4],text:p[5],vein:p[1]}}; }
-  wordParams(ws){ const r=this.rng(ws*7+13), dens=this.props.density??1; return {roseP:0.18+r()*0.2, bloomP:0.22+r()*0.2, leafy:(0.6+r()*0.8)*dens, dens, lean:(r()-0.5)*0.6, big:0.85+r()*0.45, curvy:0.8+r()*0.6, bridgeP:Math.min(0.95,(0.45+r()*0.35)*dens), flair:0.7+r()*0.8, w:0.5}; }
+  wordParams(ws){ const r=this.rng(ws*7+13), dens=this.props.density??1; return {roseP:0.18+r()*0.2, bloomP:0.28+r()*0.2, leafy:(0.6+r()*0.8)*dens, dens, lean:(r()-0.5)*0.6, big:0.85+r()*0.45, curvy:0.8+r()*0.6, bridgeP:Math.min(0.95,(0.45+r()*0.35)*dens), flair:0.7+r()*0.8, w:0.5}; }
   grow(r,E,nid,p,o){
     const tip=o.tip || (() => {
       const t = r();
@@ -795,6 +795,39 @@ class TypeGarden {
         const p1 = T(Math.cos(th) * core * 0.92, Math.sin(th) * core * 0.92);
         B.stroke([p0, p1], this.cc.line, Math.max(0.7, R * 0.03));
       }
+    }
+    this.bloomExtra(B,T,R,e,a,open,petals,shape,petalKind,core);
+  }
+  bloomExtra(B,T,R,e,a,open,petals,shape,k,core){
+    if (open < 0.2) return;
+    const C=this.cc, lw=Math.max(0.7,R*0.025);
+    const disc=(x,y,r,col,z=0.1)=>{ const P=[]; for(let i=0;i<14;i++){const t=i/14*Math.PI*2; P.push(T(x+Math.cos(t)*r,y+Math.sin(t)*r,z));} B.fill(P,col); };
+    const ruff=(n,off,rx,ry,col,rotOff,z)=>{ for(let i=0;i<n;i++){ const b=i/n*Math.PI*2+rotOff, ca=Math.cos(b), sa=Math.sin(b), P=[]; for(let j=0;j<16;j++){ const th=j/16*Math.PI*2, rr=1+0.18*Math.sin(5*th+i); const lx=Math.cos(th)*rx*rr*open, ly=Math.sin(th)*ry*rr*open, cx=ca*off*open, cy=sa*off*0.6*open; P.push(T(cx+lx*ca-ly*sa, cy+lx*sa+ly*ca, z)); } B.fill(P,col); } };
+    if (k==='sunflower') {
+      // golden-angle seed spiral
+      const n=Math.floor(26*open); for(let i=1;i<n;i++){ const rr=core*0.9*Math.sqrt(i/26), th=i*2.39996+e.ph1; disc(Math.cos(th)*rr,Math.sin(th)*rr,R*0.022,C.line,0.12); }
+    } else if (k==='poppy') {
+      disc(0,0,core*0.62,C.line,0.12);
+      for(let i=0;i<12;i++){ const th=i/12*Math.PI*2+e.ph2; const p0=T(Math.cos(th)*core*0.6,Math.sin(th)*core*0.6,0.12), p1=T(Math.cos(th)*core*1.35,Math.sin(th)*core*1.35,0.12); B.stroke([p0,p1],C.line,lw); disc(Math.cos(th)*core*1.4,Math.sin(th)*core*1.4,R*0.03,C.line,0.12); }
+      disc(0,0,core*0.28,C.blue,0.13);
+    } else if (k==='anemone') {
+      disc(0,0,core*1.05,C.line,0.11); disc(0,0,core*0.55,C.blue,0.12);
+      for(let i=0;i<10;i++){ const th=i/10*Math.PI*2; disc(Math.cos(th)*core*0.8,Math.sin(th)*core*0.8,R*0.025,C.vein,0.13); }
+    } else if (k==='marigold' || k==='carnation') {
+      ruff(10,R*0.2,R*0.18,R*0.26,C.line,e.ph1,0.1);
+      ruff(7,R*0.1,R*0.13,R*0.18,C.red,e.ph2,0.11);
+      if (k==='marigold') disc(0,0,core*0.5,C.blue,0.12);
+    } else if (k==='dahlia') {
+      ruff(12,R*0.24,R*0.08,R*0.22,C.line,e.ph1+0.3,0.1);
+      ruff(8,R*0.12,R*0.06,R*0.14,C.red,e.ph2,0.11);
+    } else if (k==='lotus') {
+      for(let i=0;i<5;i++){ const b=-Math.PI/2+(i-2)*0.42, ca=Math.cos(b), sa=Math.sin(b), P=[]; for(let j=0;j<16;j++){ const th=j/16*Math.PI*2, lx=Math.cos(th)*R*0.09*open, ly=Math.sin(th)*R*0.32*open, cx=ca*R*0.2*open, cy=sa*R*0.2*open; P.push(T(cx-ly*ca*0+lx*(-sa)+ly*ca, cy+lx*ca+ly*sa, 0.12)); } B.fill(P,C.line); }
+      disc(0,0,core*0.7,C.blue,0.13);
+    } else if (k==='chamomile' || k==='cosmos') {
+      for(let i=0;i<9;i++){ const th=i*2.39996, rr=core*0.65*Math.sqrt(i/9); disc(Math.cos(th)*rr,Math.sin(th)*rr,R*0.025,C.line,0.12); }
+    } else if (k==='zinnia') {
+      disc(0,0,core*0.7,C.line,0.11);
+      for(let i=0;i<8;i++){ const th=i/8*Math.PI*2+e.ph1; disc(Math.cos(th)*core*0.7,Math.sin(th)*core*0.7,R*0.03,C.blue,0.12); }
     }
   }
   tulip(B,cx,cy,R,rot,e,a,tl){
